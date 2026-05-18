@@ -1,0 +1,15 @@
+<Solution>
+  <Project Path="Taim.Agents/Taim.Agents.csproj" />
+  <Project Path="Taim.Api/Taim.Api.csproj" />
+  <Project Path="Taim.Budget/Taim.Budget.csproj" />
+  <Project Path="Taim.Connectors/Taim.Connectors.csproj" />
+  <Project Path="Taim.Core/Taim.Core.csproj" />
+  <Project Path="Taim.Data/Taim.Data.csproj" />
+  <Project Path="Taim.E2ETests/Taim.E2ETests.csproj" />
+  <Project Path="Taim.Host/Taim.Host.csproj" />
+  <Project Path="Taim.Memory/Taim.Memory.csproj" />
+  <Project Path="Taim.Notifications/Taim.Notifications.csproj" />
+  <Project Path="Taim.Providers/Taim.Providers.csproj" />
+  <Project Path="Taim.Tests/Taim.Tests.csproj" />
+  <Project Path="Taim.Workflows/Taim.Workflows.csproj" />
+</Solution>
