@@ -91,17 +91,25 @@ public sealed class AgentOrchestrator(
         AgentDefinition definition, IChatClient chatClient, CancellationToken ct)
     {
         using var scope = scopeFactory.CreateScope();
-        var registry      = scope.ServiceProvider.GetRequiredService<IAgentRegistry>();
-        var kpiService    = scope.ServiceProvider.GetRequiredService<IKpiService>();
-        var reportService = scope.ServiceProvider.GetRequiredService<IReportService>();
-        var notifications = scope.ServiceProvider.GetRequiredService<INotificationService>();
-        var actionService = scope.ServiceProvider.GetRequiredService<IActionService>();
+        var sp            = scope.ServiceProvider;
+        var registry      = sp.GetRequiredService<IAgentRegistry>();
+        var notifications = sp.GetRequiredService<INotificationService>();
 
         try
         {
-            await KickoffAgentAsync(
-                registry, kpiService, reportService, notifications, actionService,
-                tenantId, taskId, goal, definition, chatClient, [], ct);
+            if (IsWorkerRole(definition.Role))
+            {
+                await WorkerKickoffAsync(registry, notifications, tenantId, taskId, definition, ct);
+            }
+            else
+            {
+                var kpiService    = sp.GetRequiredService<IKpiService>();
+                var reportService = sp.GetRequiredService<IReportService>();
+                var actionService = sp.GetRequiredService<IActionService>();
+                await KickoffAgentAsync(
+                    registry, kpiService, reportService, notifications, actionService,
+                    tenantId, taskId, goal, definition, chatClient, [], ct);
+            }
         }
         catch (Exception ex)
         {
@@ -217,6 +225,34 @@ public sealed class AgentOrchestrator(
 
         await Log(notifications, tenantId, taskId, definition, $"{definition.Name}: kickoff complete", ct);
         logger.LogInformation("Kickoff complete for {Name}", definition.Name);
+    }
+
+    private static bool IsWorkerRole(AgentRole role) => role switch
+    {
+        AgentRole.Ceo or AgentRole.Cto or AgentRole.Cmo
+        or AgentRole.Cfo or AgentRole.Hr => false,
+        _ => true
+    };
+
+    private async Task WorkerKickoffAsync(
+        IAgentRegistry registry,
+        INotificationService notifications,
+        Guid tenantId, Guid taskId,
+        AgentDefinition definition,
+        CancellationToken ct)
+    {
+        var meta = BaseMetadata(tenantId, taskId, definition);
+
+        await registry.UpdateStatusAsync(tenantId, definition.Id, AgentStatus.Active, ct);
+        await notifications.NotifyAsync(tenantId, NotificationKind.AgentStatusChanged,
+            $"{definition.Name} activated", string.Empty, meta, ct);
+
+        await Log(notifications, tenantId, taskId, definition,
+            $"{definition.Name}: worker agent ready, waiting for action assignments.", ct);
+
+        await registry.UpdateStatusAsync(tenantId, definition.Id, AgentStatus.Idle, ct);
+        await notifications.NotifyAsync(tenantId, NotificationKind.AgentStatusChanged,
+            $"{definition.Name} idle", string.Empty, meta, ct);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
