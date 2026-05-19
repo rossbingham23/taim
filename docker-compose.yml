@@ -159,4 +159,3 @@ volumes:
   postgres-data:
   redis-data:
   workspaces-data:
-#  ollama-data:
