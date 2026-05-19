@@ -1,24 +1,17 @@
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Configuration;
 using Taim.Connectors.Sdk;
 
 namespace Taim.Connectors.ClaudeCode;
 
-/// <summary>
-/// Connector that exposes Claude Code CLI as a tool for developer agents.
-/// Developer agents can use this to write, edit, test, and commit code.
-///
-/// Preferred over raw API coding: the CLI handles file system operations,
-/// git commands, test execution, and interactive approval natively.
-///
-/// Requires: `claude` CLI installed and authenticated on the host.
-/// </summary>
-public sealed class ClaudeCodeConnector : IConnector
+public sealed class ClaudeCodeConnector(IConfiguration config) : IConnector
 {
+    private readonly string _workspaceRoot = config["Workspace:Root"] ?? "/app/workspaces";
+    private IReadOnlyList<AITool>? _tools;
+
     public string ConnectorId => "claude-code";
     public string DisplayName => "Claude Code";
     public string Description => "Write, edit, test, and commit code using the Claude Code CLI.";
-
-    private IReadOnlyList<AITool>? _tools;
 
     public Task StartAsync(CancellationToken ct = default)
     {
@@ -35,11 +28,14 @@ public sealed class ClaudeCodeConnector : IConnector
     public Task<IReadOnlyList<AITool>> GetToolsAsync(CancellationToken ct = default) =>
         Task.FromResult(_tools ?? throw new InvalidOperationException("ClaudeCodeConnector not started."));
 
-    private static async Task<string> RunClaudeCode(
+    private async Task<string> RunClaudeCode(
         string prompt,
-        string workingDirectory,
+        string? workingDirectory = null,
         bool nonInteractive = true)
     {
+        var dir = workingDirectory ?? _workspaceRoot;
+        Directory.CreateDirectory(dir);
+
         var args = nonInteractive
             ? $"--print \"{EscapeArg(prompt)}\""
             : $"\"{EscapeArg(prompt)}\"";
@@ -50,7 +46,7 @@ public sealed class ClaudeCodeConnector : IConnector
             {
                 FileName = "claude",
                 Arguments = args,
-                WorkingDirectory = workingDirectory,
+                WorkingDirectory = dir,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false
