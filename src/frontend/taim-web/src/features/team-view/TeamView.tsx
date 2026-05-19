@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { getTask, listAgents, listActivity, listActions, listMeetings, getMeeting, type AgentResponse, type TeamGraphResponse } from '../../lib/api'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { getTask, listAgents, listActivity, listActions, listMeetings, getMeeting, executeAction, terminateTask, type AgentResponse, type TeamGraphResponse } from '../../lib/api'
 import { onNotification } from '../../lib/signalr'
 import { TeamGraph } from '../../components/TeamGraph/TeamGraph'
 import { AgentCard } from '../../components/AgentCard/AgentCard'
@@ -55,6 +55,8 @@ export function TeamView() {
   const [showConsole, setShowConsole] = useState(true)
   const [meetings, setMeetings] = useState<MeetingRecord[]>([])
   const [selectedMeeting, setSelectedMeeting] = useState<{ meeting: MeetingRecord; messages: MeetingMessage[] } | null>(null)
+  const [runningActionId, setRunningActionId] = useState<string | null>(null)
+  const [terminating, setTerminating] = useState(false)
 
   const reload = useCallback(async () => {
     if (!taskId) return
@@ -122,6 +124,29 @@ export function TeamView() {
     } catch { /* ignore */ }
   }
 
+  const handleTerminate = async () => {
+    if (!taskId) return
+    if (!window.confirm('Terminate this task? All running agents and actions will be stopped and cancelled.')) return
+    setTerminating(true)
+    try {
+      await terminateTask(taskId)
+      navigate('/')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to terminate task')
+      setTerminating(false)
+    }
+  }
+
+  const handleRunAction = async (actionId: string) => {
+    setRunningActionId(actionId)
+    try {
+      await executeAction(actionId)
+    } catch { /* SignalR action_updated will update status */ }
+    finally {
+      setRunningActionId(null)
+    }
+  }
+
   if (loading) return <Spinner />
   if (error) return <ErrorMsg msg={error} />
 
@@ -135,6 +160,16 @@ export function TeamView() {
           <StatusBadge status={status} />
         </div>
         {status === 'bootstrapping' && <Spinner inline />}
+        <Link to={`/tasks/${taskId}/kpis`} style={styles.kpisLink}>KPIs ↗</Link>
+        {(status === 'active' || status === 'bootstrapping') && (
+          <button
+            onClick={handleTerminate}
+            disabled={terminating}
+            style={styles.terminateBtn}
+          >
+            {terminating ? 'Terminating…' : 'Terminate ✕'}
+          </button>
+        )}
       </div>
 
       <div style={styles.body}>
@@ -236,7 +271,7 @@ export function TeamView() {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {actions.map(a => (
-                  <ActionRow key={a.id} action={a} agents={agents} />
+                  <ActionRow key={a.id} action={a} agents={agents} onRun={handleRunAction} running={runningActionId === a.id} />
                 ))}
               </div>
             </div>
@@ -249,17 +284,34 @@ export function TeamView() {
   )
 }
 
-function ActionRow({ action, agents }: { action: ActionItem; agents: Agent[] }) {
+function ActionRow({ action, agents, onRun, running }: { action: ActionItem; agents: Agent[]; onRun: (id: string) => void; running: boolean }) {
   const assignee = agents.find(a => a.id === action.agentId)
   const statusColor: Record<string, string> = {
     open: '#60a5fa', in_progress: '#f59e0b', blocked: '#ef4444', done: '#22c55e', cancelled: '#475569',
   }
+  const canRun = action.status === 'open' || action.status === 'blocked'
   return (
-    <div style={{ fontSize: 12, color: '#cbd5e1', borderLeft: `2px solid ${statusColor[action.status] ?? '#475569'}`, paddingLeft: 8 }}>
-      <div style={{ color: '#f1f5f9', marginBottom: 2 }}>{action.title}</div>
-      <div style={{ color: '#64748b', fontSize: 11 }}>
-        {action.status}{assignee ? ` · ${assignee.name}` : ''}
+    <div style={{ fontSize: 12, color: '#cbd5e1', borderLeft: `2px solid ${statusColor[action.status] ?? '#475569'}`, paddingLeft: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div>
+        <div style={{ color: '#f1f5f9', marginBottom: 2 }}>{action.title}</div>
+        <div style={{ color: '#64748b', fontSize: 11 }}>
+          {action.status}{assignee ? ` · ${assignee.name}` : ''}
+        </div>
       </div>
+      {canRun && (
+        <button
+          onClick={() => onRun(action.id)}
+          disabled={running}
+          title="Run action"
+          style={{
+            background: 'none', border: '1px solid #334155', borderRadius: 4,
+            color: running ? '#334155' : '#60a5fa', cursor: running ? 'default' : 'pointer',
+            fontSize: 11, padding: '2px 6px', flexShrink: 0, marginLeft: 8,
+          }}
+        >
+          ▶
+        </button>
+      )}
     </div>
   )
 }
@@ -314,6 +366,12 @@ const styles = {
   root: { fontFamily: 'system-ui, sans-serif', minHeight: '100vh' },
   header: { display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 24 },
   back: { background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 13, padding: 0, paddingTop: 2 },
+  kpisLink: { color: '#60a5fa', textDecoration: 'none', fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap' as const },
+  terminateBtn: {
+    background: 'none', border: '1px solid #ef4444', borderRadius: 6,
+    color: '#ef4444', cursor: 'pointer', fontSize: 12, fontWeight: 600,
+    padding: '4px 10px', whiteSpace: 'nowrap' as const,
+  },
   goalText: { fontSize: 16, fontWeight: 600, color: '#f1f5f9', marginBottom: 4 },
   body: { display: 'flex', gap: 24, alignItems: 'flex-start' },
   main: { flex: 1, minWidth: 0 },

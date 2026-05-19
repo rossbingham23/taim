@@ -13,6 +13,7 @@ namespace Taim.Agents.Shared;
 
 public sealed class AgentOrchestrator(
     IServiceScopeFactory scopeFactory,
+    ITaskCancellationRegistry taskCancellationRegistry,
     ILogger<AgentOrchestrator> logger)
 {
     private const string KickoffInstruction =
@@ -65,6 +66,7 @@ public sealed class AgentOrchestrator(
                 .Select(m => m.Definition.Id)
                 .ToList();
 
+            var taskToken = taskCancellationRegistry.Register(taskId);
             _ = Task.Run(async () =>
             {
                 using var scope = scopeFactory.CreateScope();
@@ -76,13 +78,17 @@ public sealed class AgentOrchestrator(
                             tenantId, taskId, MeetingType.KickoffSync,
                             $"Align on combined strategy for: {goal}",
                             ceoMember.Definition.Id, participantIds),
-                        chatClients, ct);
+                        chatClients, taskToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    logger.LogInformation("kickoff_sync meeting cancelled for task {TaskId}", taskId);
                 }
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "kickoff_sync meeting failed for task {TaskId}", taskId);
                 }
-            }, ct);
+            }, taskToken);
         }
     }
 

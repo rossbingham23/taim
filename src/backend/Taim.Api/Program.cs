@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Serialization;
 using Taim.Agents.Shared;
+using Taim.Api.Background;
 using Taim.Api.Endpoints;
 using Taim.Api.Hubs;
 using Taim.Api.Middleware;
@@ -105,6 +106,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+// ── Scheduler ─────────────────────────────────────────────────────────────────
+builder.Services.Configure<SchedulerOptions>(builder.Configuration.GetSection("Scheduler"));
+var schedulerOptions = builder.Configuration.GetSection("Scheduler").Get<SchedulerOptions>() ?? new();
+if (schedulerOptions.Enabled)
+    builder.Services.AddHostedService<AgentScheduler>();
+
 // ── OpenAPI ────────────────────────────────────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
@@ -135,5 +142,6 @@ app.MapReportEndpoints();
 app.MapActivityEndpoints();
 app.MapActionEndpoints();
 app.MapMeetingEndpoints();
+app.MapSystemEndpoints();
 
 app.Run();

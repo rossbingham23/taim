@@ -58,7 +58,9 @@ services:
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}
       Brave__ApiKey: ${BRAVE_API_KEY:-}
       Workspace__Root: /app/workspaces
-      LlmProviders__Ollama__BaseUrl: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      Scheduler__Enabled: ${SCHEDULER_ENABLED:-true}
+      Scheduler__IntervalSeconds: ${SCHEDULER_INTERVAL_SECONDS:-30}
+      LlmProviders__Ollama__BaseUrl: ${OLLAMA_BASE_URL:-http://taim-ollama:11434}
     ports:
       - "${API_PORT:-5000}:8080"
     depends_on:
@@ -87,7 +89,7 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}
-      LlmProviders__Ollama__BaseUrl: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      LlmProviders__Ollama__BaseUrl: ${OLLAMA_BASE_URL:-http://taim-ollama:11434}
     depends_on:
       postgres:
         condition: service_healthy
@@ -109,6 +111,29 @@ services:
       - "3000:80"
     depends_on:
       - taim-api
+
+  # ── Ollama (local LLM) ───────────────────────────────────────────────────────
+  taim-ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    # GPU support (uncomment if you have an NVIDIA GPU + nvidia-container-toolkit):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
 
   # ── MCP Servers ──────────────────────────────────────────────────────────────
   # These run as stdio-transport MCP servers; they are spawned as subprocesses
@@ -134,3 +159,4 @@ volumes:
   postgres-data:
   redis-data:
   workspaces-data:
+  ollama-data:

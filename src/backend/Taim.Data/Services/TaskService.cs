@@ -86,6 +86,34 @@ public sealed class TaskService(TaimDbContext db, IBudgetService budgetService) 
         return new TeamGraph(taskId, nodes, edges);
     }
 
+    public async Task TerminateAsync(Guid tenantId, Guid taskId, CancellationToken ct = default)
+    {
+        await db.Database.ExecuteSqlRawAsync(@"
+            UPDATE tasks   SET status = 'terminated', updated_at = now()
+            WHERE id = {0} AND tenant_id = {1};
+
+            UPDATE agents  SET status = 'terminated', updated_at = now()
+            WHERE task_id = {0} AND tenant_id = {1};
+
+            UPDATE actions SET status = 'cancelled',  updated_at = now()
+            WHERE task_id = {0} AND tenant_id = {1}
+              AND status IN ('open', 'in_progress');
+
+            UPDATE meetings SET status = 'failed'
+            WHERE task_id = {0} AND tenant_id = {1}
+              AND status = 'in_progress';
+        ", [taskId, tenantId], ct);
+    }
+
+    public async Task<IReadOnlyList<TaskRecord>> GetSchedulerCandidatesAsync(CancellationToken ct = default)
+    {
+        return await db.Tasks
+            .AsNoTracking()
+            .Where(t => t.Status == "active")
+            .Select(t => new TaskRecord(t.Id, t.TenantId, t.Goal, t.Status, t.BudgetId, t.CreatedAt, t.UpdatedAt))
+            .ToListAsync(ct);
+    }
+
     private static int ComputeDepth(Guid agentId, List<AgentEntity> allAgents)
     {
         var agent = allAgents.FirstOrDefault(a => a.Id == agentId);

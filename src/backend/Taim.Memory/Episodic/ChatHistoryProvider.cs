@@ -22,11 +22,13 @@ public sealed class ChatHistoryProvider(TaimDbContext db) : IChatHistoryProvider
         int maxMessages = 50,
         CancellationToken ct = default)
     {
+        // TakeLast cannot be translated to SQL — OrderByDescending + Take, then re-sort ascending
         var rows = await db.AgentChatHistory
             .AsNoTracking()
             .Where(h => h.TenantId == tenantId && h.AgentId == agentId && h.SessionId == sessionId)
+            .OrderByDescending(h => h.Sequence)
+            .Take(maxMessages)
             .OrderBy(h => h.Sequence)
-            .TakeLast(maxMessages)
             .ToListAsync(ct);
 
         return rows.Select(ToMessage).ToList();

@@ -19,6 +19,9 @@ const KIND_COLORS: Record<NotificationKind, string> = {
   meeting_completed:     '#10b981',
   action_created:        '#818cf8',
   action_updated:        '#6366f1',
+  task_terminated:       '#ef4444',
+  system_stopped:        '#f97316',
+  system_resumed:        '#22c55e',
 }
 
 const KIND_LABELS: Record<NotificationKind, string> = {
@@ -33,6 +36,9 @@ const KIND_LABELS: Record<NotificationKind, string> = {
   meeting_completed:     'MEETING',
   action_created:        'ACTION',
   action_updated:        'ACTION',
+  task_terminated:       'TERMINATED',
+  system_stopped:        'SYSTEM',
+  system_resumed:        'SYSTEM',
 }
 
 function formatTime(iso: string): string {

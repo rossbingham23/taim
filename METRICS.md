@@ -1,7 +1,7 @@
 # TAIM — Platform Metrics
 
 > Stakeholder artifact. Updated at the end of each sprint by the PO agent.
-> Last updated: 2026-05-18 (Sprint 4 complete)
+> Last updated: 2026-05-19 (Sprint 6 complete)
 
 ---
 
@@ -26,7 +26,7 @@
 | Agent-to-agent meetings (kickoff_sync) | ✅ Done | Sprint 2 |
 | Agent work loop (execute actions + tools) | ✅ Done | Sprint 3 |
 | ClaudeCode connector → Developer agents | ✅ Done | Sprint 4 |
-| Sub-team spawning (CTO → Developer/QA) | 🔲 Not started | Sprint 6 |
+| Sub-team spawning (CTO → Developer/QA) | 🔲 Not started | Sprint 7 |
 
 **Completion: 5 / 6 (83%)**
 
@@ -41,8 +41,9 @@
 | 2 | Meetings | Agent-to-agent meetings (kickoff_sync, status_check) | ✅ Done |
 | 3 | Work loop | ActionWorker, IActionExecutor, ConnectorMapping, POST /execute | ✅ Done |
 | 4 | Dev tools | ClaudeCode + WebSearch wired to agents | ✅ Done |
-| 5 | KPI + audit | KPI dashboard page, approval audit trail | 🔲 Backlog |
-| 6 | Autonomy | Sub-team spawning, scheduling, self-build test | 🔲 Backlog |
+| 5 | KPI + audit | KPI dashboard page, approval audit trail + name fix, action Run button | ✅ Done |
+| 6 | Safety + scheduling | Task termination, system emergency stop, agent auto-scheduler | ✅ Done |
+| 7 | Autonomy | Sub-team spawning, self-build test | 🔲 Backlog |
 
 ---
 
@@ -61,10 +62,13 @@
 | Agent-to-agent meetings | ✅ Sprint 2 |
 | Agent work loop | ✅ Sprint 3 |
 | Tool use (ClaudeCode, WebSearch) | ✅ Sprint 4 |
-| KPI dashboard page | 🔲 Sprint 5 |
-| Approval audit trail | 🔲 Sprint 5 |
-| Sub-team spawning | 🔲 Sprint 6 |
-| Scheduling | 🔲 Sprint 6 |
+| KPI dashboard page | ✅ Sprint 5 |
+| Approval audit trail + agent name fix | ✅ Sprint 5 |
+| Action re-trigger (Run button) | ✅ Sprint 5 |
+| Task termination (UI + backend) | ✅ Sprint 6 |
+| System emergency stop (Redis circuit breaker) | ✅ Sprint 6 |
+| Agent auto-scheduler (BackgroundService) | ✅ Sprint 6 |
+| Sub-team spawning | 🔲 Sprint 7 |
 
 ---
 
@@ -72,10 +76,10 @@
 
 | Metric | Value | Last Run |
 |---|---|---|
-| Smoke tests (Taim.E2ETests) | 26 tests | 2026-05-18 ✅ |
+| Smoke tests (Taim.E2ETests) | 31 tests | 2026-05-19 ✅ |
 | E2E tests (Playwright) | 1 test | 2026-05-18 ✅ |
-| Build errors | 0 | 2026-05-18 ✅ |
-| TypeScript errors | 0 | 2026-05-18 ✅ |
+| Build errors | 0 | 2026-05-19 ✅ |
+| TypeScript errors | 0 | 2026-05-19 ✅ |
 
 **E2E coverage:** Login → submit goal → team assembly (up to 3 min) → activity feed → console → goals list.
 
@@ -90,10 +94,10 @@
 
 | Component | Last Build | Status |
 |---|---|---|
-| `Taim.slnx` (.NET 10) | 2026-05-18 (Sprint 2) | ✅ 0 errors, 6 warnings (pre-existing EF version conflict) |
-| `taim-web` (React/Vite) | 2026-05-18 (Sprint 2) | ✅ Clean |
-| Docker `taim-api` | 2026-05-18 (Sprint 2) | ✅ Running |
-| Docker `taim-web` | 2026-05-18 (Sprint 2) | ✅ Running |
+| `Taim.slnx` (.NET 10) | 2026-05-19 (Sprint 6) | ✅ 0 errors |
+| `taim-web` (React/Vite) | 2026-05-19 (Sprint 6) | ✅ Clean |
+| Docker `taim-api` | 2026-05-19 (Sprint 6) | ✅ Running |
+| Docker `taim-web` | 2026-05-19 (Sprint 6) | ✅ Running |
 
 ---
 

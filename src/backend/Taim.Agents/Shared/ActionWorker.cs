@@ -5,6 +5,7 @@ using Taim.Core.Agents;
 using Taim.Core.Approvals;
 using Taim.Core.Memory;
 using Taim.Core.Notifications;
+using Taim.Core.System;
 
 namespace Taim.Agents.Shared;
 
@@ -18,6 +19,7 @@ public sealed class ActionWorker(
     INotificationService notifications,
     IAgentRegistry agentRegistry,
     IChatHistoryProvider chatHistory,
+    ISystemStopService systemStopService,
     ILogger logger)
 {
     private const int MaxTurns = 15;
@@ -31,6 +33,10 @@ public sealed class ActionWorker(
         try
         {
             await RunLoopAsync(tenantId, taskId, action, agent, chatClient, tools, ct);
+        }
+        catch (OperationCanceledException)
+        {
+            logger.LogInformation("ActionWorker loop cancelled for action {ActionId}", action.Id);
         }
         catch (Exception ex)
         {
@@ -104,6 +110,12 @@ public sealed class ActionWorker(
 
         for (int turn = 0; turn < MaxTurns; turn++)
         {
+            if (await systemStopService.IsStoppedAsync(ct))
+            {
+                logger.LogInformation("System stop active — halting loop for action {ActionId}", action.Id);
+                return;
+            }
+
             var response = await chatClient.GetResponseAsync(messages, options, ct);
 
             // Add response messages to conversation and save to history

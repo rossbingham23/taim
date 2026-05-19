@@ -40,6 +40,7 @@ public sealed class TenantProviderResolver(TaimDbContext db, IConfiguration conf
         var ollamaUrl    = config["OLLAMA_BASE_URL"]
                        ?? config["LlmProviders:Ollama:BaseUrl"]
                        ?? "http://host.docker.internal:11434";
+        var ollamaModel  = config["OLLAMA_MODEL"] ?? "qwen2.5:3b";
 
         if (preferredProvider is not null)
         {
@@ -51,7 +52,7 @@ public sealed class TenantProviderResolver(TaimDbContext db, IConfiguration conf
                     => new LlmProviderConfig("openai", "gpt-4o", openaiKey, null),
                 "gemini" when !string.IsNullOrEmpty(geminiKey)
                     => new LlmProviderConfig("gemini", "gemini-2.0-flash", geminiKey, null),
-                _ => new LlmProviderConfig("ollama", "llama3.2", null, ollamaUrl),
+                _ => new LlmProviderConfig("ollama", ollamaModel, null, ollamaUrl),
             };
         }
 
@@ -63,7 +64,7 @@ public sealed class TenantProviderResolver(TaimDbContext db, IConfiguration conf
         if (!string.IsNullOrEmpty(geminiKey))
             return new LlmProviderConfig("gemini", "gemini-2.0-flash", geminiKey, null);
 
-        return new LlmProviderConfig("ollama", "llama3.2", null, ollamaUrl);
+        return new LlmProviderConfig("ollama", ollamaModel, null, ollamaUrl);
     }
 
     private static LlmProviderConfig Map(Models.TenantProviderConfigEntity e) =>

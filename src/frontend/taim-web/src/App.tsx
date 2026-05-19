@@ -7,6 +7,7 @@ import { Approvals } from './features/approvals/Approvals'
 import { Reports } from './features/reports/Reports'
 import { Settings } from './features/settings/Settings'
 import { Console } from './features/console/Console'
+import { KpiPage } from './features/kpi/KpiPage'
 import type { ReactNode } from 'react'
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -63,6 +64,7 @@ export default function App() {
                   <Routes>
                     <Route path="/" element={<TaskIntake />} />
                     <Route path="/tasks/:taskId" element={<TeamView />} />
+                    <Route path="/tasks/:taskId/kpis" element={<KpiPage />} />
                     <Route path="/approvals" element={<Approvals />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/console" element={<Console />} />

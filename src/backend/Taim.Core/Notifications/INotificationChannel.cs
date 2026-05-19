@@ -12,7 +12,10 @@ public enum NotificationKind
     MeetingCompleted,
     AgentLog,
     ActionCreated,
-    ActionUpdated
+    ActionUpdated,
+    TaskTerminated,
+    SystemStopped,
+    SystemResumed
 }
 
 public sealed record Notification(

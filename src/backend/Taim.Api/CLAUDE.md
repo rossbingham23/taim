@@ -15,6 +15,7 @@ ASP.NET Core Minimal APIs. Entry point: `Program.cs`.
 | `GET /api/kpis?taskId=` | `KpiEndpoints.cs` | KPI hierarchy roots for a task |
 | `POST /api/kpis/{kpiId}/values` | `KpiEndpoints.cs` | Record a KPI measurement |
 | `GET /api/approvals` | `ApprovalEndpoints.cs` | Pending approvals |
+| `GET /api/approvals/history?taskId=` | `ApprovalEndpoints.cs` | Decided approvals for a task (approved+denied), ordered by decided_at DESC; 400 if taskId missing |
 | `POST /api/approvals/{id}/decide` | `ApprovalEndpoints.cs` | Approve or deny |
 | `GET /api/reports?taskId=` | `ReportEndpoints.cs` | Executive reports for a task |
 | `GET /api/actions?taskId=` | `ActionEndpoints.cs` | List work-item actions for a task |
@@ -23,6 +24,10 @@ ASP.NET Core Minimal APIs. Entry point: `Program.cs`.
 | `POST /api/actions/{id}/execute` | `ActionEndpoints.cs` | Trigger (or re-trigger) action execution. 202=started, 404=not found, 409=already done/in_progress |
 | `GET /api/meetings?taskId=` | `MeetingEndpoints.cs` | List meetings for a task |
 | `GET /api/meetings/{id}` | `MeetingEndpoints.cs` | Get meeting detail + full transcript |
+| `POST /api/tasks/{taskId}/terminate` | `TaskEndpoints.cs` | Terminate task + all agents/actions; 204 on success, 404 if not found, 409 if already terminated |
+| `GET /api/system/status` | `SystemEndpoints.cs` | Get system stop state: `{ stopped: bool }` |
+| `POST /api/system/stop` | `SystemEndpoints.cs` | Activate emergency stop (Redis key); 204 |
+| `POST /api/system/resume` | `SystemEndpoints.cs` | Clear emergency stop; 204 |
 | `GET /health` | `Program.cs` | Health check |
 | `/hubs/agents` | `AgentEventHub.cs` | SignalR hub |
 

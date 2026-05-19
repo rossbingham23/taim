@@ -32,4 +32,6 @@ public interface ITaskService
     Task<IReadOnlyList<TaskRecord>> GetAllAsync(Guid tenantId, CancellationToken ct = default);
     Task<TeamGraph> GetTeamGraphAsync(Guid tenantId, Guid taskId, CancellationToken ct = default);
     Task UpdateStatusAsync(Guid tenantId, Guid taskId, string status, CancellationToken ct = default);
+    Task TerminateAsync(Guid tenantId, Guid taskId, CancellationToken ct = default);
+    Task<IReadOnlyList<TaskRecord>> GetSchedulerCandidatesAsync(CancellationToken ct = default);
 }

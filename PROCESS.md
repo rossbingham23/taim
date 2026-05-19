@@ -253,11 +253,24 @@ Before each sprint, the PO agent runs a product analysis:
 
 ### Current Sprint
 
-**Sprint 5 — KPI Dashboard and Approval Audit Trail** (next)
-- Goal: Add a KPI dashboard page per task and a complete approval history view.
-- Status: 🔲 Backlog
-- Spec: `specs/sprint-5/` (not yet written)
-- Exit criteria: User can navigate to `/tasks/:id/kpis` and see a tree of KPIs; approval history shows decided_at, decided_by
+**Sprint 6 — Scale + Safety + Autonomy** (next)
+- Goal: Task termination, system-wide emergency stop, then the scheduler. Safety gates first, scheduler last.
+- Status: 🔲 Ready
+- Specs (implement in order):
+  - `specs/sprint-6/S6-001-task-termination.md` — `ITaskCancellationRegistry`, terminate endpoint, cascade + loop cancellation
+  - `specs/sprint-6/S6-002-system-stop.md` — Redis flag, system stop/resume endpoints, Settings UI button
+  - `specs/sprint-6/S6-003-agent-scheduler.md` — `AgentScheduler` BackgroundService (LAST — requires S6-001 + S6-002)
+- Exit criteria: user can terminate any task from TeamView; Settings has Stop All Agents button; scheduler fires work loops automatically for active tasks
+
+### Previous Sprint
+
+**Sprint 5 — KPI Dashboard and Approval Audit Trail** (complete)
+- Goal: Add a KPI dashboard page per task, fix approval agent names, add approval history, and add action re-trigger UI.
+- Status: 🔲 Ready
+- Specs:
+  - `specs/sprint-5/S5-001-kpi-dashboard.md` — KPI page route + KpiResponse type fix
+  - `specs/sprint-5/S5-002-approvals-and-action-retrigger.md` — approval history endpoint + name fix + Run button
+- Exit criteria: User can navigate to `/tasks/:id/kpis` and see a KPI tree; Approvals page shows agent names and a History tab; open/blocked actions have a Run button in TeamView
 
 ### Sprint History
 
@@ -268,8 +281,8 @@ Before each sprint, the PO agent runs a product analysis:
 | 2 | Meetings | kickoff_sync + status_check meetings, meeting viewer in UI | ✅ Done | ✅ 20 smoke tests passing |
 | 3 | Agent work loop | ActionWorker, IActionExecutor, ConnectorMapping, POST /execute | ✅ Done | ✅ 24 smoke tests passing |
 | 4 | Developer tools | Worker agents, ClaudeCode/WebSearch operational, Docker infra | ✅ Done | ✅ Build + smoke |
-| 5 | KPI dashboard + audit | /tasks/:id/kpis page, approval decided_at, approval history | 🔲 Backlog | — |
-| 6 | Scale + autonomy | Sub-team spawning, scheduling, self-build test | 🔲 Backlog | — |
+| 5 | KPI dashboard + audit | KPI page, approval name fix + history, action Run button | 🔲 Ready | — |
+| 6 | Scale + safety | Task termination, system stop, agent scheduler | 🔲 Ready | — |
 
 ---
 

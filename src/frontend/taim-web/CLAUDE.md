@@ -19,6 +19,7 @@ src/
     team-view/TeamView.tsx   — task detail: team graph + agent cards + sidebar
     reports/Reports.tsx      — executive reports (fetches + streams via SignalR)
     approvals/          — approval queue
+    kpi/KpiPage.tsx     — KPI dashboard page at /tasks/:taskId/kpis
     settings/           — provider config UI
   components/
     TeamGraph/          — SVG org chart from nodes + edges
@@ -86,6 +87,8 @@ In Docker: `npm run build` then nginx serves `dist/` on port 3000.
 
 **TeamGraph** — pure SVG layout. `computeLayout()` builds a top-down hierarchy tree. Nodes are colored by `AgentStatus`, labeled with role abbreviation + agent name. Click triggers `onNodeClick` callback.
 
-**TeamView** — fetches task + agent list on mount; re-fetches on `team_update`/`agent_status_changed` SignalR events; polls every 3s while status is `'bootstrapping'`.
+**TeamView** — fetches task + agent list on mount; re-fetches on `team_update`/`agent_status_changed` SignalR events; polls every 3s while status is `'bootstrapping'`. Header has a "KPIs ↗" link to `/tasks/:taskId/kpis`.
+
+**KpiPage** — route `/tasks/:taskId/kpis`. Calls `listRootKpis(taskId)`, casts result to `KpiNode[]`, passes to `KpiDashboard`. Shows loading state and "No KPIs available" empty state.
 
 **Reports** — accepts `?taskId=` query param; fetches existing reports via `GET /api/reports`; appends new reports on `executive_report` SignalR events; deduplicates by `id`.

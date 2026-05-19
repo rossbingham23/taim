@@ -105,6 +105,28 @@ public sealed class ApprovalService(TaimDbContext db, INotificationService notif
         return entities.Select(ToRecord).ToList();
     }
 
+    public async Task<IReadOnlyList<ApprovalRequest>> GetHistoryAsync(
+        Guid tenantId,
+        Guid taskId,
+        CancellationToken ct = default)
+    {
+        var agentIds = await db.Agents
+            .AsNoTracking()
+            .Where(a => a.TenantId == tenantId && a.TaskId == taskId)
+            .Select(a => a.Id)
+            .ToListAsync(ct);
+
+        var entities = await db.Approvals
+            .AsNoTracking()
+            .Where(a => a.TenantId == tenantId
+                     && agentIds.Contains(a.AgentId)
+                     && a.Status != "pending")
+            .OrderByDescending(a => a.DecidedAt)
+            .ToListAsync(ct);
+
+        return entities.Select(ToRecord).ToList();
+    }
+
     public async Task PreApproveAsync(
         Guid tenantId,
         Guid agentId,

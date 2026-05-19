@@ -8,6 +8,7 @@ using Taim.Core.Approvals;
 using Taim.Core.Memory;
 using Taim.Core.Notifications;
 using Taim.Core.Providers;
+using Taim.Core.System;
 
 namespace Taim.Agents.Shared;
 
@@ -18,6 +19,7 @@ namespace Taim.Agents.Shared;
 public sealed class ActionExecutor(
     IServiceScopeFactory scopeFactory,
     IActionService actionService,
+    ITaskCancellationRegistry taskCancellationRegistry,
     ILogger<ActionExecutor> logger) : IActionExecutor
 {
     private static readonly HashSet<string> TriggerableStatuses =
@@ -66,12 +68,14 @@ public sealed class ActionExecutor(
                 var connectorIds = ConnectorMapping.GetConnectorIds(agent.Role);
                 var tools = await connectors.GetToolsForAgentAsync(connectorIds, ct);
 
+                var systemStop = sp.GetRequiredService<ISystemStopService>();
                 var scopedLogger = sp.GetRequiredService<ILogger<ActionWorker>>();
                 var worker = new ActionWorker(
                     actionSvc, approvalSvc, notifications,
-                    agentRegistry, chatHistory, scopedLogger);
+                    agentRegistry, chatHistory, systemStop, scopedLogger);
 
-                await worker.ExecuteAsync(tenantId, freshAction.TaskId, freshAction, agent, chatClient, tools, ct);
+                var taskToken = taskCancellationRegistry.Register(freshAction.TaskId);
+                await worker.ExecuteAsync(tenantId, freshAction.TaskId, freshAction, agent, chatClient, tools, taskToken);
             }
             catch (Exception ex)
             {

@@ -4,6 +4,7 @@ using Taim.Agents.Bootstrap;
 using Taim.Agents.Expert;
 using Taim.Agents.Shared;
 using Taim.Core.Agents;
+using Taim.Core.Notifications;
 using Taim.Core.Teams;
 
 namespace Taim.Api.Endpoints;
@@ -19,6 +20,7 @@ public static class TaskEndpoints
         group.MapPost("/", SubmitTask).WithName("SubmitTask");
         group.MapGet("/", ListTasks).WithName("ListTasks");
         group.MapGet("/{taskId:guid}", GetTask).WithName("GetTask");
+        group.MapPost("/{taskId:guid}/terminate", TerminateTask).WithName("TerminateTask");
 
         return app;
     }
@@ -102,6 +104,33 @@ public static class TaskEndpoints
 
         var graph = await taskService.GetTeamGraphAsync(tenantId, taskId, ct);
         return Results.Ok(new { task, graph });
+    }
+
+    private static async Task<IResult> TerminateTask(
+        Guid taskId,
+        ClaimsPrincipal user,
+        ITaskService taskService,
+        ITaskCancellationRegistry taskCancellationRegistry,
+        INotificationService notificationService,
+        CancellationToken ct)
+    {
+        if (!Guid.TryParse(user.FindFirst("tenantId")?.Value, out var tenantId))
+            return Results.Unauthorized();
+
+        var task = await taskService.GetAsync(tenantId, taskId, ct);
+        if (task is null) return Results.NotFound();
+
+        if (task.Status == "terminated")
+            return Results.Conflict(new { error = "Task is already terminated" });
+
+        await taskService.TerminateAsync(tenantId, taskId, ct);
+        taskCancellationRegistry.Cancel(taskId);
+
+        await notificationService.NotifyAsync(tenantId, NotificationKind.TaskTerminated,
+            "Task terminated", string.Empty,
+            new Dictionary<string, object?> { ["taskId"] = taskId.ToString() }, ct);
+
+        return Results.NoContent();
     }
 
     private sealed record SubmitTaskRequest(string Goal, decimal BudgetUsd, string? Provider = null);

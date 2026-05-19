@@ -50,7 +50,7 @@ function KpiNodeRow({ node, depth = 0 }: { node: KpiNode; depth?: number }) {
           {pct !== null ? `${pct}%` : '—'}
         </div>
       </div>
-      {node.children.map(child => (
+      {(node.children ?? []).map(child => (
         <KpiNodeRow key={child.id} node={child} depth={depth + 1} />
       ))}
     </>

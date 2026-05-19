@@ -12,11 +12,13 @@ Pure domain layer. No external dependencies — only .NET BCL. All other project
 | `IReportService` | `Reports/ReportModels.cs` | Save and retrieve executive reports |
 | `ITaskService` | `Teams/TeamModels.cs` | Task creation, status, team graph |
 | `IBudgetService` | `Budget/BudgetModels.cs` | Budget tracking and enforcement |
-| `IApprovalService` | `Approvals/ApprovalModels.cs` | Approval request lifecycle |
+| `IApprovalService` | `Approvals/ApprovalModels.cs` | Approval request lifecycle; `GetHistoryAsync(tenantId, taskId)` returns decided approvals for a task (joins through agents) |
 | `IMeetingStore` | `Meetings/MeetingModels.cs` | Meeting creation, message storage, task-scoped lookup |
 | `IMeetingOrchestrator` | `Meetings/IMeetingOrchestrator.cs` | Runs turn-based LLM meetings to completion |
 | `INotificationService` | `Notifications/INotificationChannel.cs` | Broadcast to all `INotificationChannel` implementations |
 | `INotificationChannel` | `Notifications/INotificationChannel.cs` | Channel adapter (e.g. SignalR hub) |
+| `ITaskCancellationRegistry` | `Agents/ITaskCancellationRegistry.cs` | Singleton; registers/cancels `CancellationTokenSource` per task; used by terminate endpoint and ActionExecutor |
+| `ISystemStopService` | `System/ISystemStopService.cs` | Redis-backed circuit breaker; `IsStoppedAsync`, `StopAsync`, `ResumeAsync` |
 | `IMemoryService` | `Memory/IMemoryService.cs` | Semantic memory (embedding + retrieval) |
 | `IProviderFactory` | `Providers/IProviderConfig.cs` | Create `IChatClient` for a given provider/tenant |
 | `ITenantIdAccessor` | `Tenancy/ITenantContext.cs` | Provides `TenantId` for the current scope |
@@ -37,7 +39,8 @@ AgentStatus { Idle, Active, WaitingApproval, Sleeping, Terminated }
 NotificationKind { ApprovalRequired, AgentStatusChanged, ExecutiveReport,
                    BudgetAlert, TeamUpdate,
                    MeetingStarted, MeetingMessage, MeetingCompleted,
-                   AgentLog, ActionCreated, ActionUpdated }
+                   AgentLog, ActionCreated, ActionUpdated,
+                   TaskTerminated, SystemStopped, SystemResumed }
 
 KpiDirection { HigherIsBetter, LowerIsBetter, TargetValue }
 ```

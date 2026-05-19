@@ -82,7 +82,17 @@ public abstract class ExecutiveAgentBase(IChatClient chatClient)
     {
         var messages = new List<ChatMessage>
         {
-            new(ChatRole.System, BuildSystemPrompt(ctx) + "\n\nRespond ONLY with a JSON object matching the ExecutiveResponse schema."),
+            new(ChatRole.System, BuildSystemPrompt(ctx) + """
+
+Respond ONLY with a JSON object in exactly this shape (no markdown, no extra fields):
+{
+  "analysis": "your strategic analysis",
+  "decision": "your key decision or stance",
+  "actions": ["thing you will personally do", "another personal action"],
+  "delegations": ["Brief task title for a direct report", "Another task title"]
+}
+actions and delegations must be arrays of plain strings, not objects.
+"""),
             new(ChatRole.User, instruction)
         };
 

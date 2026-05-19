@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Taim.Agents.Bootstrap;
 using Taim.Agents.Expert;
 using Taim.Agents.Meetings;
+using Taim.Core.Agents;
 using Taim.Core.Meetings;
 using Taim.Core.Providers;
 
@@ -12,6 +13,8 @@ public static class AgentsExtensions
 {
     public static IServiceCollection AddTaimAgents(this IServiceCollection services)
     {
+        services.AddSingleton<ITaskCancellationRegistry, TaskCancellationRegistry>();
+
         // Global IChatClient — resolved using env-var config (Guid.Empty → fallback to ANTHROPIC_API_KEY etc.)
         // BootstrapAgent and ExpertAgent use this; per-agent clients are created by AgentFactory.
         services.AddScoped<IChatClient>(sp =>

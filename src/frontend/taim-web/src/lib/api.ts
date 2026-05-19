@@ -140,6 +140,7 @@ export interface KpiResponse {
   unit?: string
   direction: string
   createdAt: string
+  children?: KpiResponse[]
 }
 
 export function listRootKpis(taskId: string): Promise<KpiResponse[]> {
@@ -172,6 +173,10 @@ export interface ApprovalResponse {
 
 export function listPendingApprovals(): Promise<ApprovalResponse[]> {
   return request('/api/approvals')
+}
+
+export function listApprovalHistory(taskId: string): Promise<ApprovalResponse[]> {
+  return request(`/api/approvals/history?taskId=${taskId}`)
 }
 
 export function decideApproval(approvalId: string, approved: boolean, scope: string, scopeKey?: string): Promise<void> {
@@ -217,6 +222,10 @@ export function updateAction(actionId: string, patch: { status?: string; title?:
   })
 }
 
+export function executeAction(actionId: string): Promise<void> {
+  return request(`/api/actions/${actionId}/execute`, { method: 'POST' })
+}
+
 // ── Meetings ──────────────────────────────────────────────────────────────────
 
 export function listMeetings(taskId: string): Promise<import('./types').MeetingRecord[]> {
@@ -225,4 +234,24 @@ export function listMeetings(taskId: string): Promise<import('./types').MeetingR
 
 export function getMeeting(meetingId: string): Promise<{ meeting: import('./types').MeetingRecord; messages: import('./types').MeetingMessage[] }> {
   return request(`/api/meetings/${meetingId}`)
+}
+
+// ── Task Termination ──────────────────────────────────────────────────────────
+
+export function terminateTask(taskId: string): Promise<void> {
+  return request(`/api/tasks/${taskId}/terminate`, { method: 'POST' })
+}
+
+// ── System Stop ───────────────────────────────────────────────────────────────
+
+export function getSystemStatus(): Promise<{ stopped: boolean }> {
+  return request('/api/system/status')
+}
+
+export function stopSystem(): Promise<void> {
+  return request('/api/system/stop', { method: 'POST' })
+}
+
+export function resumeSystem(): Promise<void> {
+  return request('/api/system/resume', { method: 'POST' })
 }

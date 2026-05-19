@@ -155,6 +155,9 @@ export type NotificationKind =
   | 'agent_log'
   | 'action_created'
   | 'action_updated'
+  | 'task_terminated'
+  | 'system_stopped'
+  | 'system_resumed'
 
 export interface Notification {
   id: string

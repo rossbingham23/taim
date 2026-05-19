@@ -111,6 +111,7 @@ function StatusBadge({ status }: { status: string }) {
     active: '#22c55e',
     bootstrapping: '#60a5fa',
     completed: '#94a3b8',
+    terminated: '#475569',
   }
   const color = colors[status] ?? (status.startsWith('failed') ? '#ef4444' : '#f59e0b')
   return (

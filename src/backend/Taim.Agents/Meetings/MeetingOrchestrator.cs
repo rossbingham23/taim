@@ -14,6 +14,7 @@ public sealed class MeetingOrchestrator(
     IAgentRegistry registry,
     IKpiService kpiService,
     IActionService actionService,
+    IActionExecutor actionExecutor,
     INotificationService notifications,
     ILogger<MeetingOrchestrator> logger) : IMeetingOrchestrator
 {
@@ -158,11 +159,14 @@ public sealed class MeetingOrchestrator(
                 var assignee = FindAssigneeByRole(item.AssigneeRole, participantDefs, organizerDef);
                 try
                 {
-                    await actionService.CreateAsync(new CreateActionRequest(
+                    var action = await actionService.CreateAsync(new CreateActionRequest(
                         meeting.TenantId, meeting.TaskId ?? Guid.Empty,
                         assignee?.Id, organizerDef.Id,
                         item.Title, item.Description, 50), ct);
                     actionCount++;
+
+                    if (action.AgentId.HasValue)
+                        _ = actionExecutor.TriggerAsync(meeting.TenantId, action.Id, ct);
                 }
                 catch (Exception ex)
                 {

@@ -1,3 +1,6 @@
+import { useState, useEffect } from 'react'
+import { getSystemStatus, stopSystem, resumeSystem } from '../../lib/api'
+import { onNotification } from '../../lib/signalr'
 
 interface ProviderField {
   key: string
@@ -33,6 +36,7 @@ const PROVIDERS: Array<{ name: string; id: string; fields: ProviderField[] }> = 
     id: 'ollama',
     fields: [
       { key: 'OLLAMA_BASE_URL', label: 'Base URL', placeholder: 'http://localhost:11434' },
+      { key: 'OLLAMA_MODEL', label: 'Model', placeholder: 'qwen2.5:3b' },
     ],
   },
   {
@@ -56,9 +60,75 @@ const PROVIDERS: Array<{ name: string; id: string; fields: ProviderField[] }> = 
 ]
 
 export function Settings() {
+  const [isStopped, setIsStopped] = useState<boolean | null>(null)
+  const [toggling, setToggling] = useState(false)
+
+  useEffect(() => {
+    getSystemStatus().then(s => setIsStopped(s.stopped)).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    return onNotification(n => {
+      if (n.kind === 'system_stopped') setIsStopped(true)
+      if (n.kind === 'system_resumed') setIsStopped(false)
+    })
+  }, [])
+
+  const handleToggle = async () => {
+    setToggling(true)
+    try {
+      if (isStopped) {
+        await resumeSystem()
+        setIsStopped(false)
+      } else {
+        await stopSystem()
+        setIsStopped(true)
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Request failed')
+    } finally {
+      setToggling(false)
+    }
+  }
+
   return (
     <div style={styles.root}>
       <h1 style={styles.heading}>Settings</h1>
+
+      <div style={{ ...styles.section, marginBottom: 28 }}>
+        <h2 style={styles.sectionTitle}>System Controls</h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <div>
+            <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 4 }}>Agent Activity</div>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>
+              {isStopped === null ? (
+                <span style={{ color: '#64748b' }}>Loading…</span>
+              ) : isStopped ? (
+                <span style={{ color: '#ef4444' }}>● Stopped</span>
+              ) : (
+                <span style={{ color: '#22c55e' }}>● Running</span>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={handleToggle}
+            disabled={toggling || isStopped === null}
+            style={{
+              background: 'none',
+              border: `1px solid ${isStopped ? '#22c55e' : '#ef4444'}`,
+              borderRadius: 6, cursor: toggling ? 'default' : 'pointer',
+              color: isStopped ? '#22c55e' : '#ef4444',
+              fontSize: 13, fontWeight: 600, padding: '6px 14px',
+            }}
+          >
+            {toggling ? '…' : isStopped ? 'Resume All Agents' : 'Stop All Agents'}
+          </button>
+        </div>
+        <div style={styles.envNote}>
+          <span style={styles.envNoteIcon}>ℹ</span>
+          Stopping halts all work loops immediately but preserves all task and action state. Resume to continue from where you left off.
+        </div>
+      </div>
       <p style={styles.intro}>
         Provider credentials are configured via environment variables in your <code style={styles.code}>.env</code> file or Docker Compose.
         Reference this page when setting up your environment.

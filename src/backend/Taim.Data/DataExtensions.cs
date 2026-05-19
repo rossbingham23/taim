@@ -10,6 +10,7 @@ using Taim.Core.KPIs;
 using Taim.Core.Meetings;
 using Taim.Core.Providers;
 using Taim.Core.Reports;
+using Taim.Core.System;
 using Taim.Core.Teams;
 using Taim.Data.Services;
 
@@ -56,6 +57,7 @@ public static class DataExtensions
         services.AddScoped<IMeetingStore, MeetingService>();
         services.AddScoped<IReportService, ReportService>();
         services.AddScoped<IActionService, ActionService>();
+        services.AddScoped<ISystemStopService, SystemStopService>();
 
         return services;
     }
