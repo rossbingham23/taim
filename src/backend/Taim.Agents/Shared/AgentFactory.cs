@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Taim.Agents.Bootstrap;
 using Taim.Budget.Middleware;
 using Taim.Core.Agents;
+using Taim.Core.Approvals;
 using Taim.Core.Notifications;
 using Taim.Core.Providers;
 
@@ -23,6 +24,7 @@ public sealed class AgentFactory(
     IServiceScopeFactory scopeFactory,
     IPricingCardProvider pricingCards,
     INotificationService notifications,
+    IApprovalService approvalService,
     ILogger<AgentFactory> logger)
 {
     public async Task<(AgentDefinition Definition, IChatClient ChatClient)> CreateAsync(
@@ -61,6 +63,8 @@ public sealed class AgentFactory(
             $"{request.Role} agent registered and ready.",
             new Dictionary<string, object?> { ["agentId"] = definition.Id.ToString(), ["role"] = request.Role.ToString() },
             ct);
+
+        await approvalService.PreApproveAsync(request.TenantId, definition.Id, "web-search", ct: ct);
 
         return (definition, chatClient);
     }
