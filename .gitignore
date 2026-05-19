@@ -58,6 +58,8 @@ logs/
 ## Claude Code
 .claude/*
 !.claude/agents/
+!.claude/commands/
+!.claude/settings.json
 
 ## TypeScript incremental build cache (machine-generated, differs per environment)
 *.tsbuildinfo
