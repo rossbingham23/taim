@@ -105,6 +105,30 @@ public sealed class ApprovalService(TaimDbContext db, INotificationService notif
         return entities.Select(ToRecord).ToList();
     }
 
+    public async Task PreApproveAsync(
+        Guid tenantId,
+        Guid agentId,
+        string toolName,
+        ApprovalScope scope = ApprovalScope.AgentAndTool,
+        CancellationToken ct = default)
+    {
+        var entity = new ApprovalEntity
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            AgentId = agentId,
+            ToolName = toolName,
+            ToolArguments = JsonDocument.Parse("{}"),
+            Description = $"Pre-approved: {toolName} for agent {agentId}",
+            Status = "approved",
+            Scope = scope.ToString().ToSnakeCase(),
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+
+        db.Approvals.Add(entity);
+        await db.SaveChangesAsync(ct);
+    }
+
     private static string ComputeFingerprint(Dictionary<string, object?> args) =>
         System.Convert.ToBase64String(
             System.Security.Cryptography.SHA256.HashData(

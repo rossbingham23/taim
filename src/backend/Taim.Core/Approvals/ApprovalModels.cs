@@ -43,4 +43,8 @@ public interface IApprovalService
     Task ApplyDecisionAsync(Guid tenantId, ApprovalDecision decision, CancellationToken ct = default);
 
     Task<IReadOnlyList<ApprovalRequest>> GetPendingAsync(Guid tenantId, CancellationToken ct = default);
+
+    Task PreApproveAsync(Guid tenantId, Guid agentId, string toolName,
+        ApprovalScope scope = ApprovalScope.AgentAndTool,
+        CancellationToken ct = default);
 }
