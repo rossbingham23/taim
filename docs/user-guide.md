@@ -161,3 +161,36 @@ The agent resumes from where it left off using saved conversation history.
 ## Coming Soon
 
 - **KPI Dashboard** _(Sprint 5)_: See each agent's KPIs and track progress over time.
+
+---
+
+## Developer Agents (Sprint 4)
+
+### What Developer Agents Do
+
+Developer agents (role: `developer`) and QA agents (role: `qaEngineer`) are **worker agents**. Unlike executive agents, they do NOT produce strategy reports when your team first assembles. Instead, they appear immediately as `status: idle` on the team graph and wait for action assignments from executive agents.
+
+### Approving Code Writes
+
+When a Developer agent is assigned a coding task, it uses the **Claude Code** tool (`claude_code`) to write files. The first time an agent attempts this, an approval request appears on the **Approvals** page:
+
+```
+PENDING APPROVAL
+
+  Alex (Developer) wants to call:
+  Tool: claude_code
+  Prompt: "Add unit tests for ActionService"
+  Directory: /app/workspaces
+
+  [Approve once]  [Always allow]  [Deny]
+```
+
+Click **Always allow** (`scope: AgentAndTool`) so the agent can write code going forward without further prompts.
+
+### Workspaces
+
+Files written by Developer agents are stored in `/app/workspaces` inside the container (mounted as `workspaces-data` Docker volume). To inspect output:
+
+```bash
+docker exec taim-taim-api-1 ls /app/workspaces
+```

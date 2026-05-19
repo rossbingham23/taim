@@ -2,7 +2,7 @@
 
 Autonomous multi-agent platform. User submits a goal → LLM bootstrap creates an executive AI team → each agent runs a kickoff (proposes KPIs, writes strategy report, dispatches delegations as work-item Actions) → results visible in the web UI.
 
-## Current Build State (as of Sprint 3)
+## Current Build State (as of Sprint 4)
 
 | Feature | Status |
 |---|---|
@@ -15,7 +15,7 @@ Autonomous multi-agent platform. User submits a goal → LLM bootstrap creates a
 | Delegation dispatch (kickoff delegations → Action records) | ✅ Sprint 1 |
 | Meetings (agent-to-agent coordination) | ✅ Sprint 2 |
 | Agent work loop (execute actions, tool use) | ✅ Sprint 3 |
-| Developer agents with ClaudeCode connector | 🔲 Sprint 4 |
+| Developer agents with ClaudeCode connector | ✅ Sprint 4 |
 | KPI dashboard page, approval audit trail | 🔲 Sprint 5 |
 | Sub-team spawning, scheduling | 🔲 Sprint 6+ |
 

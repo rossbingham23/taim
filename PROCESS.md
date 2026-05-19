@@ -253,11 +253,11 @@ Before each sprint, the PO agent runs a product analysis:
 
 ### Current Sprint
 
-**Sprint 4 — Developer Agents and Tool Infrastructure** (next)
-- Goal: Worker agents kick off correctly; web search and ClaudeCode connectors work in Docker; agents can do real work.
-- Status: 🟡 Ready
-- Spec: `specs/sprint-4/S4-001-developer-agents.md` (status: ready)
-- Exit criteria: An executive agent completes a web-search action autonomously; a Developer agent receives a `claude_code` action and the approval gate fires correctly
+**Sprint 5 — KPI Dashboard and Approval Audit Trail** (next)
+- Goal: Add a KPI dashboard page per task and a complete approval history view.
+- Status: 🔲 Backlog
+- Spec: `specs/sprint-5/` (not yet written)
+- Exit criteria: User can navigate to `/tasks/:id/kpis` and see a tree of KPIs; approval history shows decided_at, decided_by
 
 ### Sprint History
 
@@ -267,7 +267,7 @@ Before each sprint, the PO agent runs a product analysis:
 | 1 | Work items + process | Actions table + API, delegation dispatch, full CLAUDE.md coverage, PROCESS.md | ✅ Done | ✅ Build + smoke |
 | 2 | Meetings | kickoff_sync + status_check meetings, meeting viewer in UI | ✅ Done | ✅ 20 smoke tests passing |
 | 3 | Agent work loop | ActionWorker, IActionExecutor, ConnectorMapping, POST /execute | ✅ Done | ✅ 24 smoke tests passing |
-| 4 | Developer tools | Worker agents, ClaudeCode/WebSearch operational, Docker infra | 🟡 Ready | — |
+| 4 | Developer tools | Worker agents, ClaudeCode/WebSearch operational, Docker infra | ✅ Done | ✅ Build + smoke |
 | 5 | KPI dashboard + audit | /tasks/:id/kpis page, approval decided_at, approval history | 🔲 Backlog | — |
 | 6 | Scale + autonomy | Sub-team spawning, scheduling, self-build test | 🔲 Backlog | — |
 

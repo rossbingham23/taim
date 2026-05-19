@@ -23,7 +23,13 @@ Do NOT use HTTP/SSE transport for MCP servers — the architecture assumes subpr
 
 `ClaudeCodeConnector` runs `claude --mcp-server` as a subprocess. It exposes a `claude_code` tool that lets Developer agents write, read, and edit files.
 
-**Status (Sprint 1)**: Wired but not yet given to agents. Sprint 3/4 work: pass `ClaudeCodeConnector.GetToolsAsync()` to Developer agents in `AgentOrchestrator.ExecuteActionAsync`.
+**Status (Sprint 4)**: Operational. Reads `Workspace:Root` from `IConfiguration` (default `/app/workspaces`). The `workingDirectory` argument to `claude_code` is optional — defaults to `_workspaceRoot`.
+
+**Docker requirement:** The runtime image must have `node`, `npm`, and `claude` CLI installed. The Dockerfile installs `@anthropic-ai/claude-code` globally via npm. Verify with `docker exec taim-taim-api-1 claude --version`.
+
+## WebSearch Connector (Sprint 4 update)
+
+`WebSearchConnector` implements `IConnector` directly (no longer extends `McpStdioConnector`). When `Brave:ApiKey` is absent from config, `StartAsync` creates a fallback tool returning "web search not configured" instead of spawning the MCP server. When the key is present, behavior is unchanged.
 
 ## Adding a New Connector
 

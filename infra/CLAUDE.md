@@ -54,3 +54,24 @@ docker compose down -v                  # Stop + destroy volumes (resets DB)
 ## Redis
 
 Used for distributed caching (approvals, session data). Connection string configured in `appsettings.json`.
+
+## Sprint 4 Infrastructure Changes
+
+### Taim.Api Build Context
+
+The `taim-api` Docker build context is now `.` (repo root) so `mcp-servers/` files can be included. Dockerfile path: `src/backend/Taim.Api/Dockerfile`.
+
+### New Volume: `workspaces-data`
+
+Mounted at `/app/workspaces` in `taim-api`. Developer agents use this as their default working directory for `claude_code` tool calls.
+
+### New Environment Variables
+
+| Variable | Service | Purpose |
+|---|---|---|
+| `BRAVE_API_KEY` | `taim-api` | Brave Search API key (set in `.env`) |
+| `Workspace__Root` | `taim-api` | Working directory for ClaudeCode connector |
+
+### Node.js + claude CLI
+
+The runtime image (`mcr.microsoft.com/dotnet/aspnet:10.0-alpine`) has Node.js and `@anthropic-ai/claude-code` installed. MCP server npm dependencies are pre-built in the image via the `node-build` stage.

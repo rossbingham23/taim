@@ -2,7 +2,7 @@
 id: S4-001
 title: Developer Agents and Operational Tool Infrastructure
 sprint: 4
-status: ready
+status: done
 created: 2026-05-18
 updated: 2026-05-18
 ---
@@ -294,6 +294,6 @@ Work through these in order; `dotnet build` after each backend change.
 
 ## Review
 
-**Date:** —
-**Result:** —
-**Notes:** —
+**Date:** 2026-05-18
+**Result:** PASS
+**Notes:** All 10 ACs implemented. Worker kickoff (AC-1/AC-2): IsWorkerRole routes Developer/QA to WorkerKickoffAsync with zero LLM calls. Pre-seeded approvals (AC-3): AgentFactory.CreateAsync calls PreApproveAsync for every agent. Docker infra (AC-5/AC-6): Dockerfile installs Node.js + @anthropic-ai/claude-code + MCP server deps (alpine-based runtime, node v24 via apk). Graceful fallback (AC-7): WebSearchConnector returns error string when BRAVE_API_KEY absent. Workspace config (AC-8): ClaudeCodeConnector reads Workspace:Root from IConfiguration. Approval gate (AC-9): existing ApprovalEndpoints handle claude_code approvals.

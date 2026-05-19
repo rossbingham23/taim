@@ -120,6 +120,25 @@ Static helper. Maps `AgentRole` → connector IDs for tool assignment:
 | `Developer`, `QaEngineer`, `QaManager` | `["web-search", "claude-code"]` |
 | All others (executive roles) | `["web-search"]` |
 
+## WorkerAgentBase (Worker/WorkerAgentBase.cs)
+
+Minimal placeholder for non-executive agent roles. No `RunAsync` or `ProposeKpisAsync`.
+
+## Worker vs. Executive Kickoff
+
+`AgentOrchestrator.SafeKickoffAsync` routes on `IsWorkerRole(AgentRole)`:
+- **Executive roles** (CEO, CTO, CMO, CFO, HR): full LLM kickoff — KPIs + strategy report + delegations
+- **Worker roles** (all others): `WorkerKickoffAsync` — status→Active, log "ready", status→Idle. Zero LLM calls.
+
+```csharp
+private static bool IsWorkerRole(AgentRole role) => role switch
+{
+    AgentRole.Ceo or AgentRole.Cto or AgentRole.Cmo
+    or AgentRole.Cfo or AgentRole.Hr => false,
+    _ => true
+};
+```
+
 ## AgentOrchestrator (Shared/AgentOrchestrator.cs)
 
 Scoped service. Called from `TaskEndpoints` after team creation.
@@ -145,6 +164,8 @@ Scoped service. Creates agent DB record + budget-wrapped `IChatClient`:
 - Resolves provider config via `IProviderFactory`
 - Wraps `IChatClient` with `TokenLedgerMiddleware` (budget tracking)
 - Pushes `TeamUpdate` SignalR notification
+
+**Pre-Seeded Approvals:** `AgentFactory.CreateAsync` calls `approvalService.PreApproveAsync(tenantId, agentId, "web-search")` after every agent is created. This inserts an `approved` / `agent_and_tool` row in `approvals` so web searches never block on user approval.
 
 ## System Prompt Rules
 

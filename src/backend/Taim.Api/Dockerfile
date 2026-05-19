@@ -30,17 +30,12 @@ COPY mcp-servers/email/ email/
 RUN cd web-search && npm ci --omit=dev
 RUN cd email && npm ci --omit=dev
 
-# Stage 3 — Runtime: .NET + Node.js + claude CLI
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+# Stage 3 — Runtime: .NET + Node.js + claude CLI (Alpine-based)
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl && \
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y --no-install-recommends nodejs && \
+RUN apk add --no-cache nodejs npm && \
     npm install -g @anthropic-ai/claude-code && \
-    apt-get purge -y curl && \
-    apt-get autoremove -y && \
-    rm -rf /var/lib/apt/lists/*
+    npm cache clean --force
 
 WORKDIR /app
 COPY --from=dotnet-build /app/publish ./

@@ -1,7 +1,7 @@
 # TAIM — Platform Metrics
 
 > Stakeholder artifact. Updated at the end of each sprint by the PO agent.
-> Last updated: 2026-05-18 (Sprint 3 complete)
+> Last updated: 2026-05-18 (Sprint 4 complete)
 
 ---
 
@@ -11,9 +11,9 @@
 
 | Today | Target |
 |---|---|
-| User submits goal → agents produce strategy reports, dispatch Actions, and automatically execute them using tools (web search). Executive agents complete or block actions via tool-use loop. | Developer/QA agents use ClaudeCode to write real code, producing PRs and passing tests. |
+| User submits goal → agents produce strategy reports, dispatch Actions, and automatically execute them using tools (web search). Developer agents now receive the ClaudeCode connector and execute code-writing actions (gated on user approval for first write). | Developer/QA agents use ClaudeCode to write real code, producing PRs and passing tests. |
 
-**Qualitative assessment:** 🟡 Work loop live. Executive agents execute web-search actions autonomously. Developer agents need ClaudeCode wiring (Sprint 4).
+**Qualitative assessment:** 🟢 Work loop live. Executive agents execute web-search actions autonomously. Developer agents now have ClaudeCode connector wired (Sprint 4 complete).
 
 ---
 
@@ -25,10 +25,10 @@
 | Delegation dispatch from kickoff | ✅ Done | Sprint 1 |
 | Agent-to-agent meetings (kickoff_sync) | ✅ Done | Sprint 2 |
 | Agent work loop (execute actions + tools) | ✅ Done | Sprint 3 |
-| ClaudeCode connector → Developer agents | 🔲 Not started | Sprint 4 |
+| ClaudeCode connector → Developer agents | ✅ Done | Sprint 4 |
 | Sub-team spawning (CTO → Developer/QA) | 🔲 Not started | Sprint 6 |
 
-**Completion: 4 / 6 (67%)**
+**Completion: 5 / 6 (83%)**
 
 ---
 
@@ -40,7 +40,7 @@
 | 1 | Work items | Actions table + API, delegation dispatch, full module docs, PROCESS.md | ✅ Done |
 | 2 | Meetings | Agent-to-agent meetings (kickoff_sync, status_check) | ✅ Done |
 | 3 | Work loop | ActionWorker, IActionExecutor, ConnectorMapping, POST /execute | ✅ Done |
-| 4 | Dev tools | ClaudeCode + WebSearch wired to agents | 🔲 Backlog |
+| 4 | Dev tools | ClaudeCode + WebSearch wired to agents | ✅ Done |
 | 5 | KPI + audit | KPI dashboard page, approval audit trail | 🔲 Backlog |
 | 6 | Autonomy | Sub-team spawning, scheduling, self-build test | 🔲 Backlog |
 
@@ -60,7 +60,7 @@
 | Delegation → Actions dispatch | ✅ Sprint 1 |
 | Agent-to-agent meetings | ✅ Sprint 2 |
 | Agent work loop | ✅ Sprint 3 |
-| Tool use (ClaudeCode, WebSearch) | 🔲 Sprint 4 |
+| Tool use (ClaudeCode, WebSearch) | ✅ Sprint 4 |
 | KPI dashboard page | 🔲 Sprint 5 |
 | Approval audit trail | 🔲 Sprint 5 |
 | Sub-team spawning | 🔲 Sprint 6 |
@@ -72,7 +72,7 @@
 
 | Metric | Value | Last Run |
 |---|---|---|
-| Smoke tests (Taim.E2ETests) | 24 tests | 2026-05-18 ✅ |
+| Smoke tests (Taim.E2ETests) | 26 tests | 2026-05-18 ✅ |
 | E2E tests (Playwright) | 1 test | 2026-05-18 ✅ |
 | Build errors | 0 | 2026-05-18 ✅ |
 | TypeScript errors | 0 | 2026-05-18 ✅ |
