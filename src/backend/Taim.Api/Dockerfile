@@ -1,27 +1,52 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+# Stage 1 — .NET build (build context is repo root)
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS dotnet-build
 WORKDIR /src
 
-COPY Taim.slnx ./
-COPY Taim.Core/ Taim.Core/
-COPY Taim.Data/ Taim.Data/
-COPY Taim.Agents/ Taim.Agents/
-COPY Taim.Workflows/ Taim.Workflows/
-COPY Taim.Memory/ Taim.Memory/
-COPY Taim.Connectors/ Taim.Connectors/
-COPY Taim.Budget/ Taim.Budget/
-COPY Taim.Notifications/ Taim.Notifications/
-COPY Taim.Providers/ Taim.Providers/
-COPY Taim.Api/ Taim.Api/
-COPY Taim.Host/ Taim.Host/
-COPY Taim.Tests/ Taim.Tests/
-COPY Taim.E2ETests/ Taim.E2ETests/
+COPY src/backend/Taim.slnx ./
+COPY src/backend/Taim.Core/ Taim.Core/
+COPY src/backend/Taim.Data/ Taim.Data/
+COPY src/backend/Taim.Agents/ Taim.Agents/
+COPY src/backend/Taim.Workflows/ Taim.Workflows/
+COPY src/backend/Taim.Memory/ Taim.Memory/
+COPY src/backend/Taim.Connectors/ Taim.Connectors/
+COPY src/backend/Taim.Budget/ Taim.Budget/
+COPY src/backend/Taim.Notifications/ Taim.Notifications/
+COPY src/backend/Taim.Providers/ Taim.Providers/
+COPY src/backend/Taim.Api/ Taim.Api/
+COPY src/backend/Taim.Host/ Taim.Host/
+COPY src/backend/Taim.Tests/ Taim.Tests/
+COPY src/backend/Taim.E2ETests/ Taim.E2ETests/
 
 RUN dotnet restore Taim.slnx
 RUN dotnet publish Taim.Api/Taim.Api.csproj -c Release -o /app/publish --no-restore
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
+# Stage 2 — MCP server dependencies
+FROM node:20-slim AS node-build
+WORKDIR /mcp
+
+COPY mcp-servers/web-search/ web-search/
+COPY mcp-servers/email/ email/
+
+RUN cd web-search && npm ci --omit=dev
+RUN cd email && npm ci --omit=dev
+
+# Stage 3 — Runtime: .NET + Node.js + claude CLI
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y --no-install-recommends nodejs && \
+    npm install -g @anthropic-ai/claude-code && \
+    apt-get purge -y curl && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
-COPY --from=build /app/publish ./
+COPY --from=dotnet-build /app/publish ./
+COPY --from=node-build /mcp mcp-servers/
+RUN mkdir -p /app/workspaces
+
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
 ENTRYPOINT ["dotnet", "Taim.Api.dll"]
