@@ -374,6 +374,7 @@ public sealed class AgentOrchestrator(
             AgentRole.Cmo => new CmoAgent(client),
             AgentRole.Cfo => new CfoAgent(client),
             AgentRole.Hr  => new HrAgent(client),
-            _             => new CeoAgent(client),
+            _ => throw new ArgumentOutOfRangeException(nameof(role), role,
+                "No executive agent implementation for this role."),
         };
 }

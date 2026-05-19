@@ -21,7 +21,7 @@ public sealed class WebSearchConnector(IConfiguration config) : IConnector, IAsy
         {
             _tools = [AIFunctionFactory.Create(
                 (string query) => "web search not configured: BRAVE_API_KEY is not set",
-                "brave_web_search",
+                "web_search",
                 "Search the web using Brave Search API")];
             return;
         }

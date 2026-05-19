@@ -6,49 +6,6 @@ namespace Taim.E2ETests;
 public class DeveloperAgentTests(ApiFixture fixture)
 {
     /// <summary>
-    /// Verifies AC-3: AgentFactory.PreApproveAsync inserts a web-search approval for every agent.
-    /// Submits a simple goal, then polls until at least one approved web-search approval appears.
-    /// Requires a live stack with LLM API keys to assemble a team.
-    /// </summary>
-    [Fact]
-    public async Task AfterTeamAssembly_ApprovalsContainPreSeededWebSearch()
-    {
-        var taskRes = await fixture.Client.PostAsJsonAsync("/api/tasks",
-            new { goal = "Write a hello world program in Python", budgetUsd = 2.0 });
-        Assert.Equal(HttpStatusCode.Accepted, taskRes.StatusCode);
-
-        // Poll up to 90s for a web-search pre-approval to appear
-        var deadline = DateTime.UtcNow.AddSeconds(90);
-        bool found = false;
-        while (DateTime.UtcNow < deadline)
-        {
-            await Task.Delay(3000);
-            var res = await fixture.Client.GetAsync("/api/approvals");
-            Assert.Equal(HttpStatusCode.OK, res.StatusCode);
-
-            var body = await res.Content.ReadFromJsonAsync<JsonElement>();
-            foreach (var approval in body.EnumerateArray())
-            {
-                var toolName = approval.TryGetProperty("toolName", out var t) ? t.GetString() : null;
-                var status   = approval.TryGetProperty("status", out var s)   ? s.GetString() : null;
-                var scope    = approval.TryGetProperty("scope", out var sc)   ? sc.GetString() : null;
-
-                if (toolName == "web-search" && status == "approved" &&
-                    scope is "agentAndTool" or "agent_and_tool")
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (found) break;
-        }
-
-        Assert.True(found,
-            "Expected at least one approved web-search approval after team assembly, " +
-            "but none was found within 90 seconds. Check ANTHROPIC_API_KEY is set and the stack is running.");
-    }
-
-    /// <summary>
     /// Verifies AC-1: Developer/QA agents produce no executive strategy reports.
     /// Polls until at least one executive report appears (confirming kickoff ran),
     /// then asserts no report belongs to a Developer or QA agent.

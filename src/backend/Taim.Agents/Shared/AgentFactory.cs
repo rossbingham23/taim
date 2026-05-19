@@ -64,7 +64,7 @@ public sealed class AgentFactory(
             new Dictionary<string, object?> { ["agentId"] = definition.Id.ToString(), ["role"] = request.Role.ToString() },
             ct);
 
-        await approvalService.PreApproveAsync(request.TenantId, definition.Id, "web-search", ct: ct);
+        await approvalService.PreApproveAsync(request.TenantId, definition.Id, "web_search", ct: ct);
 
         return (definition, chatClient);
     }

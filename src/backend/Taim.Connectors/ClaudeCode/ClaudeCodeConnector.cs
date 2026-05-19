@@ -36,22 +36,20 @@ public sealed class ClaudeCodeConnector(IConfiguration config) : IConnector
         var dir = workingDirectory ?? _workspaceRoot;
         Directory.CreateDirectory(dir);
 
-        var args = nonInteractive
-            ? $"--print \"{EscapeArg(prompt)}\""
-            : $"\"{EscapeArg(prompt)}\"";
-
-        using var process = new System.Diagnostics.Process
+        var psi = new System.Diagnostics.ProcessStartInfo
         {
-            StartInfo = new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = "claude",
-                Arguments = args,
-                WorkingDirectory = dir,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false
-            }
+            FileName = "claude",
+            WorkingDirectory = dir,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
         };
+
+        if (nonInteractive)
+            psi.ArgumentList.Add("--print");
+        psi.ArgumentList.Add(prompt);
+
+        using var process = new System.Diagnostics.Process { StartInfo = psi };
         process.Start();
         var output = await process.StandardOutput.ReadToEndAsync();
         var error = await process.StandardError.ReadToEndAsync();
@@ -63,5 +61,4 @@ public sealed class ClaudeCodeConnector(IConfiguration config) : IConnector
         return output;
     }
 
-    private static string EscapeArg(string arg) => arg.Replace("\"", "\\\"");
 }
