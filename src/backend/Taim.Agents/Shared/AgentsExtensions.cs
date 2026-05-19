@@ -25,6 +25,7 @@ public static class AgentsExtensions
         services.AddScoped<BootstrapAgent>();
         services.AddScoped<ExpertAgent>();
         services.AddScoped<IMeetingOrchestrator, MeetingOrchestrator>();
+        services.AddScoped<IActionExecutor, ActionExecutor>();
 
         // Executive and domain agents are NOT registered in DI — AgentFactory instantiates
         // them directly (new CeoAgent(chatClient)) with per-tenant, per-budget IChatClient wrappers.

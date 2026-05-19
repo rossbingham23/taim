@@ -32,10 +32,13 @@ Do NOT use HTTP/SSE transport for MCP servers — the architecture assumes subpr
 3. Register in `ConnectorExtensions.cs`
 4. Wire to appropriate agent roles in `AgentOrchestrator` when the work loop is built (Sprint 3)
 
-## Tool Assignment by Role (planned)
+## Tool Assignment by Role (Sprint 3, via ConnectorMapping in Taim.Agents)
 
-| Role | Tools |
+Connector IDs are resolved in `Taim.Agents/Shared/ConnectorMapping.cs` → `GetConnectorIds(AgentRole)`:
+
+| Role | Connector IDs |
 |---|---|
-| Developer, QA | `claude_code`, `web_search` |
-| CEO, CTO, CMO, CFO, HR | `web_search` |
-| Designer | `web_search` |
+| `Developer`, `QaEngineer`, `QaManager` | `["web-search", "claude-code"]` |
+| All others (executive roles) | `["web-search"]` |
+
+`ClaudeCodeConnector` is registered as Singleton in `ConnectorExtensions.AddTaimConnectors()`.

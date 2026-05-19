@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Taim.Connectors.ClaudeCode;
 using Taim.Connectors.Email;
 using Taim.Connectors.Sdk;
 using Taim.Connectors.WebSearch;
@@ -11,6 +12,7 @@ public static class ConnectorExtensions
     {
         services.AddSingleton<IConnector, WebSearchConnector>();
         services.AddSingleton<IConnector, EmailConnector>();
+        services.AddSingleton<IConnector, ClaudeCodeConnector>();
         services.AddConnectors();
         return services;
     }

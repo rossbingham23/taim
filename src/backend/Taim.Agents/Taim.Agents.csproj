@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Taim.Core\Taim.Core.csproj" />
     <ProjectReference Include="..\Taim.Budget\Taim.Budget.csproj" />
+    <ProjectReference Include="..\Taim.Connectors\Taim.Connectors.csproj" />
   </ItemGroup>
 
   <ItemGroup>

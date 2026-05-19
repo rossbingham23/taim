@@ -15,7 +15,11 @@ Provides context enrichment (KPI state, team structure, chat history) and semant
 
 ## Episodic Memory
 
-`ChatHistoryProvider` implements `IChatHistoryProvider` — used to persist multi-turn conversations per agent so context survives container restarts. Sessions are keyed by `(agentId, sessionId)`.
+`ChatHistoryProvider` implements `IChatHistoryProvider` (defined in `Taim.Core.Memory`) — used to persist multi-turn conversations per agent so context survives container restarts. Sessions are keyed by `(agentId, sessionId)`.
+
+Both `ChatHistoryProvider` (concrete) and `IChatHistoryProvider` are registered as Scoped in `MemoryExtensions`. Use `IChatHistoryProvider` in consuming services (e.g., `ActionWorker`).
+
+**Action work loop session keys:** `action:{actionId}` — stores the full conversation for each executing action.
 
 ## Semantic Memory
 

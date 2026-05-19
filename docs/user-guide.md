@@ -107,8 +107,57 @@ Configure the LLM provider TAIM uses to power your agents:
 
 ---
 
+## Meetings
+
+After your executive team completes their kickoff strategies, the CEO automatically calls a **Kickoff Sync** meeting. All executives participate in a turn-based conversation where the CEO drives the agenda, each executive responds, and the meeting closes with a summary and concrete action items.
+
+You'll see a **Meetings** section appear in the Task page once the meeting completes:
+
+- Each meeting card shows the meeting type, topic, message count, and a summary excerpt
+- Click **View** to read the full transcript — each message is attributed to the agent who spoke it
+- Action items generated during the meeting appear in the Actions panel alongside delegations from the kickoff
+
+Meetings run fully autonomously — you don't participate. They typically produce 4–12 messages and run for 30–90 seconds depending on team size.
+
+---
+
+## Agent Work Loop (Sprint 3)
+
+After kickoff completes, agents automatically begin executing their assigned Actions. You don't need to do anything — work starts within a few seconds of the kickoff finishing.
+
+### Action Status Colors
+
+The Actions panel in the team view shows a colored left border for each action:
+
+| Color | Status | Meaning |
+|---|---|---|
+| **Blue** | `open` | Waiting to be picked up |
+| **Amber** | `in_progress` | An agent is actively working on it |
+| **Green** | `done` | Completed successfully |
+| **Red** | `blocked` | Agent couldn't continue (needs approval or hit an error) |
+
+### How Agents Execute Actions
+
+Each agent runs a multi-turn loop:
+1. Receives the action title and description as a task
+2. Uses available tools (web search for all agents; code writing for Developer/QA agents)
+3. Calls `complete_task` when finished — setting the action to `done` or `blocked`
+4. If the agent reaches 15 LLM turns without finishing, the action is automatically blocked
+
+### Unblocking a Blocked Action
+
+If an agent needs to use a tool that requires your approval (e.g., sending an email, making a file change), it will:
+1. Create an approval request visible in the **Approvals** queue
+2. Set the action to `blocked` and its own status to `WaitingApproval`
+
+To unblock:
+1. Go to the **Approvals** tab and approve or deny the tool call
+2. Use the action's **Execute** button (via `POST /api/actions/{id}/execute`) to re-trigger the agent
+
+The agent resumes from where it left off using saved conversation history.
+
+---
+
 ## Coming Soon
 
-- **Meetings** _(Sprint 2)_: Agents hold structured conversations to align strategy, resolve blockers, and report progress. You'll see meeting transcripts and action items in the Task page.
-- **Agent Work Loop** _(Sprint 3)_: Agents automatically claim Actions and execute them — writing code, doing research, drafting documents.
 - **KPI Dashboard** _(Sprint 5)_: See each agent's KPIs and track progress over time.

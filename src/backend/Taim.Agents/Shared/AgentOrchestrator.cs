@@ -33,6 +33,28 @@ public sealed class AgentOrchestrator(
 
         await Task.WhenAll(tasks);
 
+        // Fire work loops for all agents that have open actions assigned to them
+        _ = Task.Run(async () =>
+        {
+            using var scope = scopeFactory.CreateScope();
+            var sp = scope.ServiceProvider;
+            try
+            {
+                var actionService = sp.GetRequiredService<IActionService>();
+                var executor = sp.GetRequiredService<IActionExecutor>();
+                var allActions = await actionService.GetForTaskAsync(tenantId, taskId, ct);
+                foreach (var action in allActions.Where(a => a.Status == "open" && a.AgentId.HasValue))
+                {
+                    try { await executor.TriggerAsync(tenantId, action.Id, ct); }
+                    catch (Exception ex) { logger.LogError(ex, "Failed to trigger action {ActionId}", action.Id); }
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to start action work loops for task {TaskId}", taskId);
+            }
+        }, ct);
+
         // Fire kickoff_sync meeting in background after all agents complete kickoff
         var ceoMember = team.FirstOrDefault(m => m.Definition.Role == AgentRole.Ceo);
         if (ceoMember.Definition is not null)

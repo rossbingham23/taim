@@ -16,6 +16,7 @@ public static class MemoryExtensions
         services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>, NoOpEmbeddingGenerator>();
 
         services.AddScoped<ChatHistoryProvider>();
+        services.AddScoped<IChatHistoryProvider, ChatHistoryProvider>();
         services.AddScoped<KpiContextProvider>();
         services.AddScoped<TeamContextProvider>();
         services.AddScoped<IMemoryService, VectorMemoryProvider>();

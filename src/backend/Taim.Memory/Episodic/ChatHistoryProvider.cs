@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 using System.Text.Json;
+using Taim.Core.Memory;
 using Taim.Data;
 using Taim.Data.Models;
 
@@ -10,7 +11,7 @@ namespace Taim.Memory.Episodic;
 /// Loads and saves agent chat history from/to PostgreSQL.
 /// Used to restore conversation context across agent restarts.
 /// </summary>
-public sealed class ChatHistoryProvider(TaimDbContext db)
+public sealed class ChatHistoryProvider(TaimDbContext db) : IChatHistoryProvider
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 

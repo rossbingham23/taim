@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Taim.Agents.Shared;
 using Taim.Core.Actions;
 
 namespace Taim.Api.Endpoints;
@@ -15,6 +16,7 @@ public static class ActionEndpoints
         group.MapGet("/", ListActions).WithName("ListActions");
         group.MapPost("/", CreateAction).WithName("CreateAction");
         group.MapPatch("/{actionId:guid}", UpdateAction).WithName("UpdateAction");
+        group.MapPost("/{actionId:guid}/execute", ExecuteAction).WithName("ExecuteAction");
 
         return app;
     }
@@ -70,6 +72,30 @@ public static class ActionEndpoints
         {
             return Results.NotFound();
         }
+    }
+
+    private static async Task<IResult> ExecuteAction(
+        Guid actionId,
+        ClaimsPrincipal user,
+        IActionService actionService,
+        IActionExecutor executor,
+        CancellationToken ct)
+    {
+        if (!Guid.TryParse(user.FindFirst("tenantId")?.Value, out var tenantId))
+            return Results.Unauthorized();
+
+        var action = await actionService.GetAsync(tenantId, actionId, ct);
+        if (action is null)
+            return Results.NotFound();
+
+        if (action.Status is "done" or "in_progress")
+            return Results.Conflict(new { error = "Action is not in a triggerable state", status = action.Status });
+
+        var triggered = await executor.TriggerAsync(tenantId, actionId, ct);
+        if (!triggered)
+            return Results.Conflict(new { error = "Action is not in a triggerable state", status = action.Status });
+
+        return Results.Accepted(value: new { message = "Execution started" });
     }
 
     private sealed record CreateActionBody(

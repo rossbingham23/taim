@@ -253,11 +253,11 @@ Before each sprint, the PO agent runs a product analysis:
 
 ### Current Sprint
 
-**Sprint 2 — Meetings**
-- Goal: Agents coordinate with each other autonomously through structured turn-based meetings.
-- Status: 🔲 Ready to implement
-- Spec: `specs/sprint-2/S2-001-meetings.md`
-- Exit criteria: CEO calls a `kickoff_sync` meeting after team assembly; meeting transcript visible in UI
+**Sprint 4 — Developer Agents and Tool Infrastructure** (next)
+- Goal: Worker agents kick off correctly; web search and ClaudeCode connectors work in Docker; agents can do real work.
+- Status: 🟡 Ready
+- Spec: `specs/sprint-4/S4-001-developer-agents.md` (status: ready)
+- Exit criteria: An executive agent completes a web-search action autonomously; a Developer agent receives a `claude_code` action and the approval gate fires correctly
 
 ### Sprint History
 
@@ -265,9 +265,9 @@ Before each sprint, the PO agent runs a product analysis:
 |---|---|---|---|---|
 | 0 | Foundation | Login, goal submission, team assembly, kickoff, reports, approvals | ✅ Done | ✅ E2E passing |
 | 1 | Work items + process | Actions table + API, delegation dispatch, full CLAUDE.md coverage, PROCESS.md | ✅ Done | ✅ Build + smoke |
-| 2 | Meetings | kickoff_sync + status_check meetings, meeting viewer in UI | 🔲 Ready | — |
-| 3 | Agent work loop | ExecuteActionAsync, tool invocation loop, action status updates | 🔲 Backlog | — |
-| 4 | Developer tools | ClaudeCode connector → Developer agents, web search → execs | 🔲 Backlog | — |
+| 2 | Meetings | kickoff_sync + status_check meetings, meeting viewer in UI | ✅ Done | ✅ 20 smoke tests passing |
+| 3 | Agent work loop | ActionWorker, IActionExecutor, ConnectorMapping, POST /execute | ✅ Done | ✅ 24 smoke tests passing |
+| 4 | Developer tools | Worker agents, ClaudeCode/WebSearch operational, Docker infra | 🟡 Ready | — |
 | 5 | KPI dashboard + audit | /tasks/:id/kpis page, approval decided_at, approval history | 🔲 Backlog | — |
 | 6 | Scale + autonomy | Sub-team spawning, scheduling, self-build test | 🔲 Backlog | — |
 
@@ -280,7 +280,7 @@ The platform is self-build capable when all of these are true:
 - [x] Actions table + API (Sprint 1)
 - [x] Delegation dispatch from kickoff (Sprint 1)
 - [ ] Agent work loop: receive action → execute → complete/block (Sprint 3)
-- [ ] Meetings: kickoff_sync at minimum (Sprint 2)
+- [x] Meetings: kickoff_sync at minimum (Sprint 2)
 - [ ] ClaudeCode connector wired to Developer agents (Sprint 4)
 - [ ] Sub-team spawning: CTO can create Developer/QA agents (Sprint 6)
 

@@ -89,11 +89,44 @@ Scoped service registered via `IMeetingOrchestrator`. Runs a turn-based LLM meet
 
 `chatClients` is a `Dictionary<Guid, IChatClient>` passed as parameter (not DI-injected) to use per-agent budget-wrapped clients.
 
+## ActionWorker (Shared/ActionWorker.cs)
+
+Plain class — NOT in DI. Instantiated by `ActionExecutor` with all dependencies resolved from a scope.
+
+**`ExecuteAsync(tenantId, taskId, action, agent, chatClient, tools, ct)`** — runs the multi-turn LLM tool-use loop:
+1. Updates action to `in_progress`, pushes `ActionUpdated` notification
+2. Creates synthetic `complete_task` AIFunction backed by a TaskCompletionSource
+3. Loads session history from `agent_chat_history` (key: `action:{actionId}`) or seeds system+user messages
+4. Loops up to 15 turns: `GetResponseAsync` → process `FunctionCallContent` items → check approval gate → execute approved tools → save tool results to history
+5. On `complete_task` call: sets action to `done` or `blocked`, pushes `ActionUpdated`, resets agent to `Idle`
+6. On max turns without completion: sets action to `blocked` ("Max turns reached")
+7. On tool requiring approval: creates `ApprovalRequest`, sets action to `blocked`, sets agent to `WaitingApproval`
+8. On unhandled exception: sets action to `blocked` (appends error message), resets agent to `Idle`
+
+## IActionExecutor / ActionExecutor (Shared/IActionExecutor.cs, ActionExecutor.cs)
+
+`IActionExecutor` is Scoped in DI. `ActionExecutor` implements it.
+
+**`TriggerAsync(tenantId, actionId, ct)`** — checks action is `open` or `blocked`, then fires a background `Task.Run` (its own scope via `IServiceScopeFactory`) that resolves all deps, creates `ActionWorker`, and calls `ExecuteAsync`. Returns `false` if action not found or not triggerable.
+
+Dependencies resolved inside the background scope: `IActionService`, `IAgentRegistry`, `IApprovalService`, `INotificationService`, `IChatHistoryProvider`, `IConnectorRegistry`, `IProviderFactory`.
+
+## ConnectorMapping (Shared/ConnectorMapping.cs)
+
+Static helper. Maps `AgentRole` → connector IDs for tool assignment:
+
+| Role(s) | Connector IDs |
+|---|---|
+| `Developer`, `QaEngineer`, `QaManager` | `["web-search", "claude-code"]` |
+| All others (executive roles) | `["web-search"]` |
+
 ## AgentOrchestrator (Shared/AgentOrchestrator.cs)
 
 Scoped service. Called from `TaskEndpoints` after team creation.
 
-**`KickoffTeamAsync`** — fires all agents in `Task.WhenAll`; individual failures are caught and logged, the rest continue. **After `Task.WhenAll` completes**, fires a background `kickoff_sync` meeting via `IMeetingOrchestrator.RunAsync` with CEO as organizer and all other agents as participants.
+**`KickoffTeamAsync`** — fires all agents in `Task.WhenAll`; individual failures are caught and logged, the rest continue. **After `Task.WhenAll` completes**:
+1. Fires background work loops for all agents with `open` actions (via `IActionExecutor.TriggerAsync`)
+2. Fires a background `kickoff_sync` meeting via `IMeetingOrchestrator.RunAsync` with CEO as organizer
 
 **`KickoffAgentAsync`** sequence per agent:
 1. `registry.UpdateStatusAsync` → `Active`; push `AgentStatusChanged` notification

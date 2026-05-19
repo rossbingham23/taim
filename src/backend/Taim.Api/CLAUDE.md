@@ -20,6 +20,7 @@ ASP.NET Core Minimal APIs. Entry point: `Program.cs`.
 | `GET /api/actions?taskId=` | `ActionEndpoints.cs` | List work-item actions for a task |
 | `POST /api/actions` | `ActionEndpoints.cs` | Create an action |
 | `PATCH /api/actions/{id}` | `ActionEndpoints.cs` | Update action status/assignment |
+| `POST /api/actions/{id}/execute` | `ActionEndpoints.cs` | Trigger (or re-trigger) action execution. 202=started, 404=not found, 409=already done/in_progress |
 | `GET /api/meetings?taskId=` | `MeetingEndpoints.cs` | List meetings for a task |
 | `GET /api/meetings/{id}` | `MeetingEndpoints.cs` | Get meeting detail + full transcript |
 | `GET /health` | `Program.cs` | Health check |
